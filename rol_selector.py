@@ -5,7 +5,7 @@ class RolSelector(ctk.CTk):
     def __init__(self):
         super().__init__()
         self.title("Seleccionar Rol")
-        self.geometry("400x200")
+        self.geometry("400x300")
 
         ctk.CTkLabel(self, text="¿Cómo querés ingresar?", font=("Arial", 16)).pack(pady=20)
 

@@ -9,7 +9,7 @@ class SocioPanel(ctk.CTk):
         super().__init__()
         self.usuario = usuario
         self.title(f"Panel de Socio - {usuario}")
-        self.geometry("700x600")
+        self.geometry("700x950")
 
         self.label_titulo = ctk.CTkLabel(self, text="Seleccioná un día para ver clases", font=("Arial", 20))
         self.label_titulo.pack(pady=10)
@@ -23,11 +23,14 @@ class SocioPanel(ctk.CTk):
         self.frame_clases = ctk.CTkScrollableFrame(self, width=600, height=250)
         self.frame_clases.pack(pady=10)
 
-        self.boton_historial = ctk.CTkButton(self, text="Ver mis reservas", command=self.ver_reservas)
-        self.boton_historial.pack(pady=10)
+        self.label_titulo_historial = ctk.CTkLabel(self, text="Ver mis reservas", font=("Arial", 20))
+        self.label_titulo_historial.pack(pady=10) # Agregado el título para el historial
+        
 
         self.historial = ctk.CTkTextbox(self, width=600, height=150)
         self.historial.pack(pady=10)
+
+        self.ver_reservas()
 
     def mostrar_clases_por_fecha(self):
         fecha = self.calendario.get_date()
@@ -59,6 +62,7 @@ class SocioPanel(ctk.CTk):
         conn = sqlite3.connect("gimnasio.db")
         cursor = conn.cursor()
 
+        # Verificar si la clase existe
         cursor.execute("SELECT capacidad FROM clases WHERE id=?", (clase_id,))
         clase = cursor.fetchone()
         if not clase:
@@ -67,6 +71,20 @@ class SocioPanel(ctk.CTk):
             return
 
         capacidad = clase[0]
+
+        # Verificar si el usuario ya reservó esa clase en esa fecha
+        cursor.execute("""
+            SELECT id FROM reservas 
+            WHERE usuario=? AND clase_id=? AND fecha=?
+        """, (self.usuario, clase_id, fecha))
+        existe = cursor.fetchone()
+
+        if existe:
+            messagebox.showerror("Error", "Ya reservaste esta clase en esa fecha.")
+            conn.close()
+            return
+
+        # Verificar si hay cupos disponibles
         cursor.execute("SELECT COUNT(*) FROM reservas WHERE clase_id=? AND fecha=?", (clase_id, fecha))
         ocupados = cursor.fetchone()[0]
 
@@ -79,6 +97,7 @@ class SocioPanel(ctk.CTk):
             self.mostrar_clases_por_fecha()
 
         conn.close()
+
 
     def ver_reservas(self):
         conn = sqlite3.connect("gimnasio.db")
@@ -94,5 +113,9 @@ class SocioPanel(ctk.CTk):
         conn.close()
 
         self.historial.delete("1.0", "end")
-        for r in reservas:
-            self.historial.insert("end", f"{r[0]} - {r[1]} - {r[2]} - {r[3]}\n")
+        if not reservas:
+            self.historial.insert("end", "No tenés reservas.\n")
+        else:
+            for r in reservas:
+                self.historial.insert("end", f"{r[0]} - {r[1]} - {r[2]} - {r[3]}\n")
+        self.historial.configure(state="disabled")

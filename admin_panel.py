@@ -2,14 +2,13 @@ import customtkinter as ctk
 from tkcalendar import DateEntry
 import sqlite3
 from tkinter import messagebox
-from datetime import datetime
+import datetime
 
 class AdminPanel(ctk.CTk):
     def __init__(self):
         super().__init__()
         self.title("Panel de Administrador")
         self.geometry("700x600")
-
         ctk.CTkLabel(self, text="Agregar nueva clase", font=("Arial", 18)).pack(pady=10)
 
         self.entry_nombre = ctk.CTkEntry(self, placeholder_text="Nombre de la clase")
