@@ -14,10 +14,6 @@ def crear_bd():
         )
     """)
 
-    # Usuarios de prueba
-    cursor.execute("INSERT INTO usuarios (nombre, contraseña, rol) VALUES (?, ?, ?)", ("admin1", "adminpass", "admin"))
-    cursor.execute("INSERT INTO usuarios (nombre, contraseña, rol) VALUES (?, ?, ?)", ("socio1", "sociopass", "socio"))
-
     conn.commit()
     conn.close()
 

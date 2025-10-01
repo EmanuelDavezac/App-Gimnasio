@@ -20,6 +20,7 @@ class RolSelector(ctk.CTk):
         self.destroy()
         LoginApp(rol="socio").mainloop()
 
+
 if __name__ == "__main__":
     app = RolSelector()
     app.mainloop()

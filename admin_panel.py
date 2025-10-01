@@ -4,11 +4,17 @@ import sqlite3
 from tkinter import messagebox
 import datetime
 
+
 class AdminPanel(ctk.CTk):
     def __init__(self):
         super().__init__()
         self.title("Panel de Administrador")
         self.geometry("700x600")
+
+        # 👇 Botón para volver al RolSelector
+        ctk.CTkButton(self, text="⬅ Volver", fg_color="gray",
+                      command=self.volver).pack(pady=5)
+
         ctk.CTkLabel(self, text="Agregar nueva clase", font=("Arial", 18)).pack(pady=10)
 
         self.entry_nombre = ctk.CTkEntry(self, placeholder_text="Nombre de la clase")
@@ -78,7 +84,8 @@ class AdminPanel(ctk.CTk):
             ctk.CTkLabel(frame, text=texto).pack(side="left", padx=10)
 
             ctk.CTkButton(frame, text="Editar", command=lambda cid=clase[0]: self.editar_clase(cid)).pack(side="right", padx=5)
-            ctk.CTkButton(frame, text="Eliminar", fg_color="red", command=lambda cid=clase[0]: self.eliminar_clase(cid)).pack(side="right", padx=5)
+            ctk.CTkButton(frame, text="Eliminar", fg_color="red",
+                          command=lambda cid=clase[0]: self.eliminar_clase(cid)).pack(side="right", padx=5)
 
     def editar_clase(self, clase_id):
         conn = sqlite3.connect("gimnasio.db")
@@ -141,3 +148,8 @@ class AdminPanel(ctk.CTk):
         self.entry_horario.delete(0, "end")
         self.entry_capacidad.delete(0, "end")
         self.date_picker.set_date(datetime.date.today())
+
+    def volver(self):
+        self.destroy()
+        from rol_selector import RolSelector
+        RolSelector().mainloop()

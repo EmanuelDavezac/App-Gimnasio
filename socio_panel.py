@@ -1,8 +1,7 @@
+import customtkinter as ctk
 from tkcalendar import Calendar
 import sqlite3
 from tkinter import messagebox
-import customtkinter as ctk
-
 
 class SocioPanel(ctk.CTk):
     def __init__(self, usuario):
@@ -10,6 +9,9 @@ class SocioPanel(ctk.CTk):
         self.usuario = usuario
         self.title(f"Panel de Socio - {usuario}")
         self.geometry("700x950")
+
+        ctk.CTkButton(self, text="⬅ Volver", fg_color="gray",
+                      command=self.volver).pack(pady=5)
 
         self.label_titulo = ctk.CTkLabel(self, text="Seleccioná un día para ver clases", font=("Arial", 20))
         self.label_titulo.pack(pady=10)
@@ -24,13 +26,13 @@ class SocioPanel(ctk.CTk):
         self.frame_clases.pack(pady=10)
 
         self.label_titulo_historial = ctk.CTkLabel(self, text="Ver mis reservas", font=("Arial", 20))
-        self.label_titulo_historial.pack(pady=10) # Agregado el título para el historial
-        
+        self.label_titulo_historial.pack(pady=10)
 
         self.historial = ctk.CTkTextbox(self, width=600, height=150)
         self.historial.pack(pady=10)
 
         self.ver_reservas()
+
 
     def mostrar_clases_por_fecha(self):
         fecha = self.calendario.get_date()
@@ -52,7 +54,8 @@ class SocioPanel(ctk.CTk):
             for clase in clases:
                 disponibles = clase[4] - clase[5]
                 texto = f"{clase[1]} - {clase[2]} - {clase[3]} | Cupos: {disponibles}"
-                btn = ctk.CTkButton(self.frame_clases, text=texto, command=lambda cid=clase[0]: self.reservar_clase(cid, fecha))
+                btn = ctk.CTkButton(self.frame_clases, text=texto,
+                                    command=lambda cid=clase[0]: self.reservar_clase(cid, fecha))
                 btn.pack(pady=5)
         else:
             lbl = ctk.CTkLabel(self.frame_clases, text="No hay clases ese día")
@@ -62,7 +65,6 @@ class SocioPanel(ctk.CTk):
         conn = sqlite3.connect("gimnasio.db")
         cursor = conn.cursor()
 
-        # Verificar si la clase existe
         cursor.execute("SELECT capacidad FROM clases WHERE id=?", (clase_id,))
         clase = cursor.fetchone()
         if not clase:
@@ -72,7 +74,6 @@ class SocioPanel(ctk.CTk):
 
         capacidad = clase[0]
 
-        # Verificar si el usuario ya reservó esa clase en esa fecha
         cursor.execute("""
             SELECT id FROM reservas 
             WHERE usuario=? AND clase_id=? AND fecha=?
@@ -84,20 +85,19 @@ class SocioPanel(ctk.CTk):
             conn.close()
             return
 
-        # Verificar si hay cupos disponibles
         cursor.execute("SELECT COUNT(*) FROM reservas WHERE clase_id=? AND fecha=?", (clase_id, fecha))
         ocupados = cursor.fetchone()[0]
 
         if ocupados >= capacidad:
             messagebox.showerror("Error", "Clase sin cupos disponibles.")
         else:
-            cursor.execute("INSERT INTO reservas (usuario, clase_id, fecha) VALUES (?, ?, ?)", (self.usuario, clase_id, fecha))
+            cursor.execute("INSERT INTO reservas (usuario, clase_id, fecha) VALUES (?, ?, ?)",
+                           (self.usuario, clase_id, fecha))
             conn.commit()
             messagebox.showinfo("Éxito", f"Reserva realizada para el {fecha}")
             self.mostrar_clases_por_fecha()
 
         conn.close()
-
 
     def ver_reservas(self):
         conn = sqlite3.connect("gimnasio.db")
@@ -119,3 +119,8 @@ class SocioPanel(ctk.CTk):
             for r in reservas:
                 self.historial.insert("end", f"{r[0]} - {r[1]} - {r[2]} - {r[3]}\n")
         self.historial.configure(state="disabled")
+
+    def volver(self):
+            self.destroy()
+            from rol_selector import RolSelector
+            RolSelector().mainloop()
