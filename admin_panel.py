@@ -3,45 +3,104 @@ from tkcalendar import DateEntry
 import sqlite3
 from tkinter import messagebox
 import datetime
+import os
+from PIL import Image
 
 
 class AdminPanel(ctk.CTk):
     def __init__(self):
         super().__init__()
         self.title("Panel de Administrador")
-        self.geometry("700x600")
+        self.geometry("800x650")
 
-        # 👇 Botón para volver al RolSelector
-        ctk.CTkButton(self, text="⬅ Volver", fg_color="gray",
-                      command=self.volver).pack(pady=5)
+        # =============== Fondo con imagen =================
+        ruta_base = os.path.dirname(__file__)
+        fondo_path = os.path.join(ruta_base, "assets", "fondo_azul.jpg")
 
-        ctk.CTkLabel(self, text="Agregar nueva clase", font=("Arial", 18)).pack(pady=10)
+        if os.path.exists(fondo_path):
+            bg_image = ctk.CTkImage(
+                light_image=Image.open(fondo_path),
+                size=(800, 650)
+            )
+            bg_label = ctk.CTkLabel(self, image=bg_image, text="")
+            bg_label.place(x=0, y=0, relwidth=1, relheight=1)
 
-        self.entry_nombre = ctk.CTkEntry(self, placeholder_text="Nombre de la clase")
-        self.entry_nombre.pack(pady=5)
+            # Capa semitransparente sobre el fondo
+            overlay = ctk.CTkFrame(self, fg_color="#FFFFFF", corner_radius=0)
+            overlay.place(x=0, y=0, relwidth=1, relheight=1)
 
-        self.entry_instructor = ctk.CTkEntry(self, placeholder_text="Instructor")
-        self.entry_instructor.pack(pady=5)
+        # =============== Título =================
+        ctk.CTkLabel(
+            self,
+            text="🧩 Panel de Administración",
+            font=("Segoe UI", 24, "bold"),
+            text_color="#2C3E50"
+        ).pack(pady=(15, 10))
 
-        self.entry_horario = ctk.CTkEntry(self, placeholder_text="Horario (ej: 18:00)")
-        self.entry_horario.pack(pady=5)
+        # =============== Botón Volver =================
+        ctk.CTkButton(
+            self,
+            text="⬅ Volver",
+            fg_color="#4A90E2",
+            hover_color="#357ABD",
+            text_color="white",
+            corner_radius=20,
+            width=100,
+            command=self.volver
+        ).pack(pady=(0, 15))
 
-        self.entry_capacidad = ctk.CTkEntry(self, placeholder_text="Capacidad")
-        self.entry_capacidad.pack(pady=5)
+        # =============== Marco del formulario =================
+        form_frame = ctk.CTkFrame(self, fg_color="white", corner_radius=15)
+        form_frame.pack(pady=10, padx=30, fill="x")
 
-        ctk.CTkLabel(self, text="Fecha de la clase").pack(pady=5)
-        self.date_picker = DateEntry(self, date_pattern='yyyy-mm-dd')
-        self.date_picker.pack(pady=5)
+        ctk.CTkLabel(form_frame, text="Agregar nueva clase",
+                     font=("Segoe UI", 18, "bold"), text_color="#34495E").pack(pady=(15, 10))
 
-        self.boton_guardar = ctk.CTkButton(self, text="Guardar clase", command=self.guardar_clase)
-        self.boton_guardar.pack(pady=10)
+        # Entradas
+        self.entry_nombre = ctk.CTkEntry(form_frame, placeholder_text="Nombre de la clase", height=35)
+        self.entry_nombre.pack(pady=5, padx=20)
 
-        ctk.CTkLabel(self, text="Clases existentes", font=("Arial", 16)).pack(pady=10)
-        self.frame_clases = ctk.CTkScrollableFrame(self, width=650, height=300)
-        self.frame_clases.pack(pady=10)
+        self.entry_instructor = ctk.CTkEntry(form_frame, placeholder_text="Instructor", height=35)
+        self.entry_instructor.pack(pady=5, padx=20)
+
+        self.entry_horario = ctk.CTkEntry(form_frame, placeholder_text="Horario (ej: 18:00)", height=35)
+        self.entry_horario.pack(pady=5, padx=20)
+
+        self.entry_capacidad = ctk.CTkEntry(form_frame, placeholder_text="Capacidad", height=35)
+        self.entry_capacidad.pack(pady=5, padx=20)
+
+        ctk.CTkLabel(form_frame, text="Fecha de la clase", font=("Segoe UI", 14)).pack(pady=(10, 5))
+        self.date_picker = DateEntry(form_frame, date_pattern='yyyy-mm-dd')
+        self.date_picker.pack(pady=(0, 10))
+
+        self.boton_guardar = ctk.CTkButton(
+            form_frame,
+            text="💾 Guardar clase",
+            fg_color="#27AE60",
+            hover_color="#1E8449",
+            height=35,
+            corner_radius=10,
+            command=self.guardar_clase
+        )
+        self.boton_guardar.pack(pady=(10, 20))
+
+        # =============== Línea divisoria =================
+        ctk.CTkFrame(self, height=2, fg_color="#BDC3C7").pack(fill="x", padx=30, pady=10)
+
+        # =============== Sección de clases existentes =================
+        ctk.CTkLabel(
+            self,
+            text="📚 Clases existentes",
+            font=("Segoe UI", 18, "bold"),
+            text_color="#2C3E50"
+        ).pack(pady=5)
+
+        self.frame_clases = ctk.CTkScrollableFrame(self, width=740, height=300, fg_color="#F7F9F9")
+        self.frame_clases.pack(pady=10, padx=30, fill="both", expand=True)
 
         self.mostrar_clases()
 
+    # =============== CRUD =================
     def guardar_clase(self):
         nombre = self.entry_nombre.get()
         instructor = self.entry_instructor.get()
@@ -77,14 +136,18 @@ class AdminPanel(ctk.CTk):
         conn.close()
 
         for clase in clases:
-            frame = ctk.CTkFrame(self.frame_clases)
+            frame = ctk.CTkFrame(self.frame_clases, fg_color="white", corner_radius=10)
             frame.pack(pady=5, fill="x", padx=10)
 
             texto = f"{clase[1]} - {clase[2]} - {clase[3]} - Capacidad: {clase[4]} - Fecha: {clase[5]}"
-            ctk.CTkLabel(frame, text=texto).pack(side="left", padx=10)
+            ctk.CTkLabel(frame, text=texto, font=("Segoe UI", 13), text_color="#2C3E50").pack(side="left", padx=10)
 
-            ctk.CTkButton(frame, text="Editar", command=lambda cid=clase[0]: self.editar_clase(cid)).pack(side="right", padx=5)
-            ctk.CTkButton(frame, text="Eliminar", fg_color="red",
+            ctk.CTkButton(frame, text="✏ Editar", width=70, height=30,
+                          fg_color="#3498DB", hover_color="#2980B9",
+                          command=lambda cid=clase[0]: self.editar_clase(cid)).pack(side="right", padx=5)
+
+            ctk.CTkButton(frame, text="🗑 Eliminar", width=80, height=30,
+                          fg_color="#E74C3C", hover_color="#C0392B",
                           command=lambda cid=clase[0]: self.eliminar_clase(cid)).pack(side="right", padx=5)
 
     def editar_clase(self, clase_id):
@@ -104,7 +167,9 @@ class AdminPanel(ctk.CTk):
         self.entry_capacidad.insert(0, str(clase[3]))
         self.date_picker.set_date(clase[4])
 
-        self.boton_guardar.configure(text="Actualizar clase", command=lambda: self.actualizar_clase(clase_id))
+        self.boton_guardar.configure(text="Actualizar clase", fg_color="#F39C12",
+                                     hover_color="#D68910",
+                                     command=lambda: self.actualizar_clase(clase_id))
 
     def actualizar_clase(self, clase_id):
         nombre = self.entry_nombre.get()
@@ -129,7 +194,9 @@ class AdminPanel(ctk.CTk):
 
         messagebox.showinfo("Éxito", "Clase actualizada correctamente")
         self.limpiar_formulario()
-        self.boton_guardar.configure(text="Guardar clase", command=self.guardar_clase)
+        self.boton_guardar.configure(text="💾 Guardar clase", fg_color="#27AE60",
+                                     hover_color="#1E8449",
+                                     command=self.guardar_clase)
         self.mostrar_clases()
 
     def eliminar_clase(self, clase_id):
