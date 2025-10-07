@@ -9,9 +9,9 @@ class LoginApp(ctk.CTk):
         self.rol = rol
         self.title(f"Login - {rol.capitalize()}")
         self.geometry("700x500")
-        self.configure(fg_color="#5b8fd6")  # Fondo azul claro suave
+        self.configure(fg_color="#5b8fd6")  # Fondo principal azul claro suave
 
-        # ==== Imagen de fondo ====
+        # Imagen de fondo del login
         self.bg_image_path = "assets/fondo_login.jpg"
         self.redimensionando = False
         self.tamaño_anterior = (self.winfo_width(), self.winfo_height())
@@ -21,7 +21,7 @@ class LoginApp(ctk.CTk):
         self.bg_label = ctk.CTkLabel(self, image=self.bg_image, text="")
         self.bg_label.grid(row=0, column=0, sticky="nsew")
 
-        # ==== Formulario ====
+        # Formulario de login
         self.form_frame = ctk.CTkFrame(self, corner_radius=20, fg_color="#fff7b2", border_width=3, border_color="#ffe066")
         self.form_frame.grid(row=0, column=1, sticky="nsew", padx=40, pady=40)
 
@@ -35,31 +35,37 @@ class LoginApp(ctk.CTk):
         self.password_entry = ctk.CTkEntry(self.form_frame, placeholder_text="Contraseña", show="*")
         self.password_entry.pack(pady=10, ipadx=10, ipady=5)
 
+        # Botón para iniciar sesión
         self.ingresar_btn = ctk.CTkButton(self.form_frame, text="Ingresar",
                                           fg_color="#7ea6e0", hover_color="#5b8fd6",
                                           text_color="white", corner_radius=10,
                                           command=self.login)
         self.ingresar_btn.pack(pady=20, ipadx=10)
 
+        # Botón para abrir ventana de registro
         self.registrar_btn = ctk.CTkButton(self.form_frame, text="📝 Registrarse",
                                            fg_color="#ffe066", hover_color="#ffe699",
                                            text_color="#5b8fd6", corner_radius=10,
                                            command=self.abrir_registro)
         self.registrar_btn.pack(pady=10, ipadx=10)
 
+        # Botón para volver a selector de rol
         self.volver_btn = ctk.CTkButton(self.form_frame, text="⬅ Volver",
                                         fg_color="#bdbdbd", hover_color="#999999",
                                         text_color="white", corner_radius=10,
                                         command=self.volver)
         self.volver_btn.pack(pady=10, ipadx=10)
 
+        # Redimensionamiento dinámico del formulario y la imagen
         self.bind("<Configure>", self.redimensionar_dinamico)
 
+    # Controla el redimensionamiento para no ejecutarlo demasiado seguido
     def redimensionar_dinamico(self, event=None):
         if not self.redimensionando:
             self.redimensionando = True
             self.after(150, self.actualizar_layout)
 
+    # Actualiza tamaño de la imagen de fondo y del formulario según ventana
     def actualizar_layout(self):
         ancho_actual = self.winfo_width()
         alto_actual = self.winfo_height()
@@ -80,6 +86,7 @@ class LoginApp(ctk.CTk):
 
         self.redimensionando = False
 
+    # Lógica de inicio de sesión
     def login(self):
         username = self.username_entry.get()
         password = self.password_entry.get()
@@ -106,24 +113,26 @@ class LoginApp(ctk.CTk):
         else:
             messagebox.showerror("Error", "Usuario o contraseña incorrectos")
 
+    # Vuelve al selector de rol
     def volver(self):
         self.destroy()
         from rol_selector import RolSelector
         RolSelector().mainloop()
 
+    # Abre ventana para registrar un nuevo usuario
     def abrir_registro(self):
         registro = ctk.CTkToplevel(self)
         registro.title("Registrar")
         registro.geometry("400x300")
         registro.configure(fg_color="#fff7b2")
 
-        # Centrar sobre el login
+        # Centrar sobre la ventana de login
         self.update_idletasks()
         x = self.winfo_x() + (self.winfo_width() // 2) - 200
         y = self.winfo_y() + (self.winfo_height() // 2) - 150
         registro.geometry(f"+{x}+{y}")
 
-        # Mantener al frente y bloquear fondo
+        # Bloquea interacción con ventana principal mientras registro está abierto
         registro.transient(self)
         registro.grab_set()
         registro.focus_force()
@@ -137,6 +146,7 @@ class LoginApp(ctk.CTk):
         entry_contraseña = ctk.CTkEntry(registro, placeholder_text="Contraseña", show="*")
         entry_contraseña.pack(pady=10)
 
+        # Lógica de registro de usuario
         def registrar():
             usuario = entry_usuario.get()
             contraseña = entry_contraseña.get()
