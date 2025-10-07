@@ -220,3 +220,5 @@ class AdminPanel(ctk.CTk):
         self.destroy()
         from rol_selector import RolSelector
         RolSelector().mainloop()
+
+print ("alejo prueba")
