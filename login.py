@@ -8,7 +8,7 @@ class LoginApp(ctk.CTk):
         super().__init__()
         self.rol = rol
         self.title(f"Login - {rol.capitalize()}")
-        self.geometry("900x500")
+        self.geometry("600x500")
 
         # Imagen de fondo
         self.bg_image_path = "assets/fondo_login.jpg"
