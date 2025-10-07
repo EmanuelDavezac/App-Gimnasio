@@ -44,7 +44,7 @@ class SocioPanel(ctk.CTk):
                                    headersbackground="#fff7b2", normalbackground="#fff7b2", foreground="#5b8fd6",
                                    weekendbackground="#fff7b2", weekendforeground="#5b8fd6",
                                    othermonthbackground="#f7e9a0", othermonthwebackground="#f7e9a0",
-                                   selectbackground="#5b8fd6", selectforeground="#fff7b2")
+                                   selectbackground="#ffe066", selectforeground="#fff7b2")
         self.calendario.pack(pady=5)
 
         fechas_con_clases = self.obtener_fechas_con_clases()

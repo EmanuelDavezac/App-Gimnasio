@@ -8,9 +8,10 @@ class LoginApp(ctk.CTk):
         super().__init__()
         self.rol = rol
         self.title(f"Login - {rol.capitalize()}")
-        self.geometry("600x500")
+        self.geometry("700x500")
+        self.configure(fg_color="#5b8fd6")  # Fondo azul claro suave
 
-        # Imagen de fondo
+        # ==== Imagen de fondo ====
         self.bg_image_path = "assets/fondo_login.jpg"
         self.redimensionando = False
         self.tamaño_anterior = (self.winfo_width(), self.winfo_height())
@@ -20,11 +21,12 @@ class LoginApp(ctk.CTk):
         self.bg_label = ctk.CTkLabel(self, image=self.bg_image, text="")
         self.bg_label.grid(row=0, column=0, sticky="nsew")
 
-        # Formulario
-        self.form_frame = ctk.CTkFrame(self, corner_radius=20, fg_color="white")
+        # ==== Formulario ====
+        self.form_frame = ctk.CTkFrame(self, corner_radius=20, fg_color="#fff7b2", border_width=3, border_color="#ffe066")
         self.form_frame.grid(row=0, column=1, sticky="nsew", padx=40, pady=40)
 
-        self.titulo = ctk.CTkLabel(self.form_frame, text=f"Login para {rol}", font=("Arial", 20, "bold"), text_color="#333")
+        self.titulo = ctk.CTkLabel(self.form_frame, text=f"🔐 Login para {rol}",
+                                   font=("Arial Rounded MT Bold", 20), text_color="#5b8fd6")
         self.titulo.pack(pady=(20, 10))
 
         self.username_entry = ctk.CTkEntry(self.form_frame, placeholder_text="Usuario")
@@ -33,15 +35,23 @@ class LoginApp(ctk.CTk):
         self.password_entry = ctk.CTkEntry(self.form_frame, placeholder_text="Contraseña", show="*")
         self.password_entry.pack(pady=10, ipadx=10, ipady=5)
 
-        self.ingresar_btn = ctk.CTkButton(self.form_frame, text="Ingresar", fg_color="#0077cc", hover_color="#005fa3", command=self.login)
+        self.ingresar_btn = ctk.CTkButton(self.form_frame, text="Ingresar",
+                                          fg_color="#7ea6e0", hover_color="#5b8fd6",
+                                          text_color="white", corner_radius=10,
+                                          command=self.login)
         self.ingresar_btn.pack(pady=20, ipadx=10)
 
-        self.registrar_btn = ctk.CTkButton(self.form_frame, text="📝 Registrarse", fg_color="#4A90E2", hover_color="#357ABD", command=self.abrir_registro)
+        self.registrar_btn = ctk.CTkButton(self.form_frame, text="📝 Registrarse",
+                                           fg_color="#ffe066", hover_color="#ffe699",
+                                           text_color="#5b8fd6", corner_radius=10,
+                                           command=self.abrir_registro)
         self.registrar_btn.pack(pady=10, ipadx=10)
 
-        self.volver_btn = ctk.CTkButton(self.form_frame, text="⬅ Volver", fg_color="gray", hover_color="#666", command=self.volver)
+        self.volver_btn = ctk.CTkButton(self.form_frame, text="⬅ Volver",
+                                        fg_color="#bdbdbd", hover_color="#999999",
+                                        text_color="white", corner_radius=10,
+                                        command=self.volver)
         self.volver_btn.pack(pady=10, ipadx=10)
-
 
         self.bind("<Configure>", self.redimensionar_dinamico)
 
@@ -105,8 +115,21 @@ class LoginApp(ctk.CTk):
         registro = ctk.CTkToplevel(self)
         registro.title("Registrar")
         registro.geometry("400x300")
+        registro.configure(fg_color="#fff7b2")
 
-        ctk.CTkLabel(registro, text="Nuevo usuario", font=("Arial", 18, "bold")).pack(pady=10)
+        # Centrar sobre el login
+        self.update_idletasks()
+        x = self.winfo_x() + (self.winfo_width() // 2) - 200
+        y = self.winfo_y() + (self.winfo_height() // 2) - 150
+        registro.geometry(f"+{x}+{y}")
+
+        # Mantener al frente y bloquear fondo
+        registro.transient(self)
+        registro.grab_set()
+        registro.focus_force()
+
+        ctk.CTkLabel(registro, text="Nuevo usuario", font=("Arial Rounded MT Bold", 18),
+                     text_color="#5b8fd6").pack(pady=10)
 
         entry_usuario = ctk.CTkEntry(registro, placeholder_text="Nombre de usuario")
         entry_usuario.pack(pady=10)
@@ -133,13 +156,15 @@ class LoginApp(ctk.CTk):
                 conn.close()
                 return
 
-            cursor.execute("INSERT INTO usuarios (nombre, contraseña, rol) VALUES (?, ?, ?)", (usuario, contraseña, self.rol))
+            cursor.execute("INSERT INTO usuarios (nombre, contraseña, rol) VALUES (?, ?, ?)",
+                           (usuario, contraseña, self.rol))
             conn.commit()
             conn.close()
             messagebox.showinfo("Éxito", "Usuario registrado correctamente")
             registro.destroy()
 
-        ctk.CTkButton(registro, text="Registrar", fg_color="#27AE60", hover_color="#1E8449", command=registrar).pack(pady=20)
+        ctk.CTkButton(registro, text="Registrar", fg_color="#5b8fd6", hover_color="#5b8fd6",
+                      text_color="white", corner_radius=10, command=registrar).pack(pady=20)
 
 if __name__ == "__main__":
     app = LoginApp(rol="socio")

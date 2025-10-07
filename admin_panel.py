@@ -197,8 +197,8 @@ class AdminPanel(ctk.CTk):
 
         messagebox.showinfo("Éxito", "Clase actualizada correctamente")
         self.limpiar_formulario()
-        self.boton_guardar.configure(text="💾 Guardar clase", fg_color="#27AE60",
-                                     hover_color="#1E8449",
+        self.boton_guardar.configure(text="💾 Guardar clase", fg_color="#ffe066",
+                                     hover_color="#D68910",
                                      command=self.guardar_clase)
         self.mostrar_clases()
     def eliminar_clase(self, clase_id):
