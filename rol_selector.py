@@ -57,7 +57,7 @@ class RolSelector(ctk.CTk):
             self.bg_label.image = self.bg_image
 
             # Calcular nueva altura del panel (más alto y vertical)
-            nueva_altura = max(420, int(alto_actual * 0.7))  # mínimo 420, se adapta hasta 70% del alto
+            nueva_altura = max(420, int(alto_actual * 0.7))
             self.panel.configure(height=nueva_altura)
 
             # Reubicar el panel centrado
