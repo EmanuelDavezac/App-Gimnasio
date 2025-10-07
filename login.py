@@ -140,6 +140,7 @@ class LoginApp(ctk.CTk):
             registro.destroy()
 
         ctk.CTkButton(registro, text="Registrar", fg_color="#27AE60", hover_color="#1E8449", command=registrar).pack(pady=20)
+        print("Hola mundo")
 
 if __name__ == "__main__":
     app = LoginApp(rol="socio")
