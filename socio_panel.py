@@ -225,3 +225,4 @@ class SocioPanel(ctk.CTk):
         self.destroy()
         from rol_selector import RolSelector
         RolSelector().mainloop()
+        print("emanuel")
