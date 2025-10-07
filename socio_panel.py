@@ -11,7 +11,7 @@ class SocioPanel(ctk.CTk):
         self.usuario = usuario
         self.title(f"Panel de Socio - {usuario}")
         self.geometry("800x800")
-        self.configure(fg_color="#f0f0f5")
+        self.configure(fg_color="#5b8fd6")  # azul claro suave
 
         # ==== Fondo con imagen ====
         try:
@@ -22,46 +22,74 @@ class SocioPanel(ctk.CTk):
             pass
 
         # ==== Contenedor principal ====
-        contenedor = ctk.CTkFrame(self, fg_color="white")
-        contenedor.pack(pady=20, padx=30, fill="both", expand=True)
+        main_frame = ctk.CTkFrame(self, fg_color="#fff7b2")
+        main_frame.pack(pady=20, padx=30, fill="both", expand=True)
+        main_frame.grid_columnconfigure(0, weight=1)
+        main_frame.grid_columnconfigure(1, weight=1)
+        main_frame.grid_rowconfigure(0, weight=1)
 
-        # ==== Botón volver ====
-        ctk.CTkButton(contenedor, text="⬅ Volver", fg_color="gray",
-                      hover_color="#4a4a4a", command=self.volver,
+        # ==== Columna izquierda ====
+        left_frame = ctk.CTkFrame(main_frame, fg_color="#e3f6fc", corner_radius=20, border_width=3, border_color="#b2cfff")
+        left_frame.grid(row=0, column=0, sticky="nsew", padx=(0, 10), pady=0)
+
+        ctk.CTkButton(left_frame, text="⬅ Volver", fg_color="#7ea6e0",
+                      hover_color="#5b8fd6", text_color="#fff", command=self.volver,
                       height=30, width=100).pack(pady=(10, 5))
 
-        # ==== Título ====
-        ctk.CTkLabel(contenedor, text="📅 Seleccioná un día para ver clases",
-                     font=("Arial Rounded MT Bold", 18)).pack(pady=5)
+        ctk.CTkLabel(left_frame, text="📅 Seleccioná un día para ver clases",
+                     font=("Arial Rounded MT Bold", 18), text_color="#5b8fd6").pack(pady=5)
 
-        # ==== Calendario ====
-        self.calendario = Calendar(contenedor, selectmode='day', date_pattern='yyyy-mm-dd')
+        self.calendario = Calendar(left_frame, selectmode='day', date_pattern='yyyy-mm-dd',
+                                   background="#fff7b2", disabledbackground="#fff7b2", bordercolor="#5b8fd6",
+                                   headersbackground="#fff7b2", normalbackground="#fff7b2", foreground="#5b8fd6",
+                                   weekendbackground="#fff7b2", weekendforeground="#5b8fd6",
+                                   othermonthbackground="#f7e9a0", othermonthwebackground="#f7e9a0",
+                                   selectbackground="#5b8fd6", selectforeground="#fff7b2")
         self.calendario.pack(pady=5)
 
-        # 🔵 Pintar días con clases
         fechas_con_clases = self.obtener_fechas_con_clases()
         for fecha in fechas_con_clases:
             self.calendario.calevent_create(fecha, "Clase disponible", "clase")
-        self.calendario.tag_config("clase", background="#b60000", foreground="white")
+        self.calendario.tag_config("clase", background="#5b8fd6", foreground="#fff7b2")
 
-        # ==== Botón ver clases ====
-        ctk.CTkButton(contenedor, text="Ver clases disponibles",
-                      fg_color="#0077b6", hover_color="#005f8f",
+        ctk.CTkButton(left_frame, text="Ver clases disponibles",
+                      fg_color="#5b8fd6", hover_color="#7ea6e0", text_color="#fff7b2",
                       height=35, command=self.mostrar_clases_por_fecha).pack(pady=5)
 
-        # ==== Clases del día ====
-        self.frame_clases = ctk.CTkScrollableFrame(contenedor, width=600, height=200)
-        self.frame_clases.pack(pady=5)
+        # ==== Botón Mis reservas debajo ====
+        ctk.CTkButton(left_frame, text="Mis reservas →", fg_color="#ffe066",
+                      hover_color="#ffe699", text_color="#5b8fd6",
+                      command=self.toggle_reservas, height=35, width=180).pack(pady=(5, 10))
 
-        # ==== Título reservas ====
-        ctk.CTkLabel(contenedor, text="🧾 Mis reservas",
-                     font=("Arial Rounded MT Bold", 18)).pack(pady=(10, 5))
+        self.frame_clases = ctk.CTkScrollableFrame(left_frame, width=350, height=300,
+                                                   fg_color="#e3f6fc", scrollbar_button_color="#e3f6fc",
+                                                   scrollbar_fg_color="#e3f6fc")
+        self.frame_clases.pack(pady=(10, 20), padx=10, fill="both", expand=True)
 
-        # ==== Historial de reservas ====
-        self.frame_reservas = ctk.CTkScrollableFrame(contenedor, width=600, height=200)
-        self.frame_reservas.pack(pady=5)
+        # ==== Panel derecho ocultable ====
+        self.right_frame = None
+        self.reservas_visible = False
 
-        self.ver_reservas()
+    def toggle_reservas(self):
+        if self.reservas_visible:
+            if self.right_frame:
+                self.right_frame.destroy()
+            self.reservas_visible = False
+        else:
+            self.right_frame = ctk.CTkFrame(self, fg_color="#fff7b2", corner_radius=20,
+                                            border_width=3, border_color="#ffe066")
+            self.right_frame.place(relx=0.55, rely=0.1, relwidth=0.4, relheight=0.8)
+
+            ctk.CTkLabel(self.right_frame, text="🧾 Mis reservas",
+                         font=("Arial Rounded MT Bold", 18), text_color="#5b8fd6").pack(pady=(10, 5))
+
+            self.frame_reservas = ctk.CTkScrollableFrame(self.right_frame, width=350, height=500,
+                                                         fg_color="#fff7b2", scrollbar_button_color="#fff7b2",
+                                                         scrollbar_fg_color="#fff7b2")
+            self.frame_reservas.pack(pady=(10, 20), padx=10, fill="both", expand=True)
+
+            self.ver_reservas()
+            self.reservas_visible = True
 
     def obtener_fechas_con_clases(self):
         conn = sqlite3.connect("gimnasio.db")
@@ -79,7 +107,6 @@ class SocioPanel(ctk.CTk):
                 pass
 
         return fechas_convertidas
-
 
     def mostrar_clases_por_fecha(self):
         fecha = self.calendario.get_date()
@@ -101,15 +128,15 @@ class SocioPanel(ctk.CTk):
             for clase in clases:
                 disponibles = clase[4] - clase[5]
                 texto = f"🏋️ {clase[1]} | {clase[2]} | {clase[3]} | Cupos: {disponibles}"
-                color = "#0077b6" if disponibles > 0 else "gray"
+                color = "#5b8fd6" if disponibles > 0 else "#bdbdbd"
                 btn = ctk.CTkButton(self.frame_clases, text=texto,
-                                    fg_color=color, hover_color="#005f8f",
+                                    fg_color=color, hover_color="#7ea6e0", text_color="#fff7b2",
                                     height=35,
                                     state="normal" if disponibles > 0 else "disabled",
                                     command=lambda cid=clase[0]: self.reservar_clase(cid, fecha))
                 btn.pack(pady=3, padx=8, fill="x")
         else:
-            lbl = ctk.CTkLabel(self.frame_clases, text="No hay clases ese día 🙁", text_color="gray")
+            lbl = ctk.CTkLabel(self.frame_clases, text="No hay clases ese día 🙁", text_color="#5b8fd6")
             lbl.pack(pady=10)
 
     def reservar_clase(self, clase_id, fecha):
@@ -148,6 +175,7 @@ class SocioPanel(ctk.CTk):
         conn.close()
         self.ver_reservas()
 
+
     def ver_reservas(self):
         for widget in self.frame_reservas.winfo_children():
             widget.destroy()
@@ -169,16 +197,16 @@ class SocioPanel(ctk.CTk):
                          text_color="gray").pack(pady=10)
         else:
             for r in reservas:
-                frame = ctk.CTkFrame(self.frame_reservas)
+                frame = ctk.CTkFrame(self.frame_reservas, fg_color="#fff7b2")
                 frame.pack(pady=5, fill="x", padx=10)
 
                 texto = f"• {r[1]} - {r[2]} - {r[3]} - {r[4]}"
                 ctk.CTkLabel(frame, text=texto, font=("Segoe UI", 13),
-                             text_color="#2C3E50").pack(side="left", padx=10)
+                             text_color="#5b8fd6").pack(side="left", padx=10)
 
                 ctk.CTkButton(frame, text="🗑 Cancelar", width=100, height=30,
-                              fg_color="#E74C3C", hover_color="#C0392B",
-                              text_color="white",
+                              fg_color="#ffe066", hover_color="#ffe699",
+                              text_color="#5b8fd6",
                               command=lambda rid=r[0]: self.cancelar_reserva(rid)).pack(side="right", padx=5)
 
     def cancelar_reserva(self, reserva_id):

@@ -40,7 +40,7 @@ def crear_tabla_reservas():
     conn = sqlite3.connect("gimnasio.db")
     cursor = conn.cursor()
 
-    # Tabla de reservas con columna 'fecha'
+    # Tabla de reservas
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS reservas (
             id INTEGER PRIMARY KEY AUTOINCREMENT,

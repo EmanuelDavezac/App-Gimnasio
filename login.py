@@ -1,6 +1,7 @@
 import customtkinter as ctk
 from tkinter import messagebox
 from PIL import Image
+import sqlite3
 
 class LoginApp(ctk.CTk):
     def __init__(self, rol):
@@ -9,17 +10,11 @@ class LoginApp(ctk.CTk):
         self.title(f"Login - {rol.capitalize()}")
         self.geometry("900x500")
 
-        # Ruta de imagen y temporizador
+        # Imagen de fondo
         self.bg_image_path = "assets/fondo_login.jpg"
         self.redimensionando = False
         self.tamaño_anterior = (self.winfo_width(), self.winfo_height())
 
-        # Layout dividido
-        self.grid_columnconfigure(0, weight=1)
-        self.grid_columnconfigure(1, weight=1)
-        self.grid_rowconfigure(0, weight=1)
-
-        # Imagen de fondo
         fondo = Image.open(self.bg_image_path)
         self.bg_image = ctk.CTkImage(light_image=fondo, dark_image=fondo, size=(450, 500))
         self.bg_label = ctk.CTkLabel(self, image=self.bg_image, text="")
@@ -41,10 +36,13 @@ class LoginApp(ctk.CTk):
         self.ingresar_btn = ctk.CTkButton(self.form_frame, text="Ingresar", fg_color="#0077cc", hover_color="#005fa3", command=self.login)
         self.ingresar_btn.pack(pady=20, ipadx=10)
 
+        self.registrar_btn = ctk.CTkButton(self.form_frame, text="📝 Registrarse", fg_color="#4A90E2", hover_color="#357ABD", command=self.abrir_registro)
+        self.registrar_btn.pack(pady=10, ipadx=10)
+
         self.volver_btn = ctk.CTkButton(self.form_frame, text="⬅ Volver", fg_color="gray", hover_color="#666", command=self.volver)
         self.volver_btn.pack(pady=10, ipadx=10)
 
-        # Evento de redimensionamiento
+
         self.bind("<Configure>", self.redimensionar_dinamico)
 
     def redimensionar_dinamico(self, event=None):
@@ -57,7 +55,6 @@ class LoginApp(ctk.CTk):
         alto_actual = self.winfo_height()
 
         if (ancho_actual, alto_actual) != self.tamaño_anterior:
-            # Redimensionar imagen
             ancho_img = int(ancho_actual * 0.5)
             alto_img = alto_actual
             fondo = Image.open(self.bg_image_path).resize((ancho_img, alto_img))
@@ -65,12 +62,10 @@ class LoginApp(ctk.CTk):
             self.bg_label.configure(image=self.bg_image)
             self.bg_label.image = self.bg_image
 
-            # Redimensionar formulario
             ancho_form = int(ancho_actual * 0.35)
             alto_form = int(alto_actual * 0.6)
             self.form_frame.configure(width=ancho_form, height=alto_form)
 
-            # Guardar nuevo tamaño
             self.tamaño_anterior = (ancho_actual, alto_actual)
 
         self.redimensionando = False
@@ -79,9 +74,20 @@ class LoginApp(ctk.CTk):
         username = self.username_entry.get()
         password = self.password_entry.get()
 
-        if username and password:
+        if not username or not password:
+            messagebox.showerror("Error", "Completa ambos campos")
+            return
+
+        conn = sqlite3.connect("gimnasio.db")
+        cursor = conn.cursor()
+        cursor.execute("SELECT rol FROM usuarios WHERE nombre=? AND contraseña=?", (username, password))
+        resultado = cursor.fetchone()
+        conn.close()
+
+        if resultado:
+            rol_en_bd = resultado[0]
             self.destroy()
-            if self.rol == "admin":
+            if rol_en_bd == "admin":
                 from admin_panel import AdminPanel
                 AdminPanel().mainloop()
             else:
@@ -94,6 +100,46 @@ class LoginApp(ctk.CTk):
         self.destroy()
         from rol_selector import RolSelector
         RolSelector().mainloop()
+
+    def abrir_registro(self):
+        registro = ctk.CTkToplevel(self)
+        registro.title("Registrar")
+        registro.geometry("400x300")
+
+        ctk.CTkLabel(registro, text="Nuevo usuario", font=("Arial", 18, "bold")).pack(pady=10)
+
+        entry_usuario = ctk.CTkEntry(registro, placeholder_text="Nombre de usuario")
+        entry_usuario.pack(pady=10)
+
+        entry_contraseña = ctk.CTkEntry(registro, placeholder_text="Contraseña", show="*")
+        entry_contraseña.pack(pady=10)
+
+        def registrar():
+            usuario = entry_usuario.get()
+            contraseña = entry_contraseña.get()
+
+            if not usuario or not contraseña:
+                messagebox.showerror("Error", "Completa todos los campos")
+                return
+            if len(contraseña) < 6:
+                messagebox.showerror("Error", "La contraseña debe tener al menos 6 caracteres")
+                return
+
+            conn = sqlite3.connect("gimnasio.db")
+            cursor = conn.cursor()
+            cursor.execute("SELECT * FROM usuarios WHERE nombre=?", (usuario,))
+            if cursor.fetchone():
+                messagebox.showerror("Error", "El usuario ya existe")
+                conn.close()
+                return
+
+            cursor.execute("INSERT INTO usuarios (nombre, contraseña, rol) VALUES (?, ?, ?)", (usuario, contraseña, self.rol))
+            conn.commit()
+            conn.close()
+            messagebox.showinfo("Éxito", "Usuario registrado correctamente")
+            registro.destroy()
+
+        ctk.CTkButton(registro, text="Registrar", fg_color="#27AE60", hover_color="#1E8449", command=registrar).pack(pady=20)
 
 if __name__ == "__main__":
     app = LoginApp(rol="socio")

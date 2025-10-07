@@ -20,7 +20,7 @@ class RolSelector(ctk.CTk):
         self.bg_label.place(relx=0, rely=0, relwidth=1, relheight=1)
 
         # Panel central con altura proporcional y ancho fijo
-        self.panel = ctk.CTkFrame(self, corner_radius=20, fg_color="white", width=360, height=280)
+        self.panel = ctk.CTkFrame(self, corner_radius=20, fg_color="white", width=360, height=420)
         self.panel.place(relx=0.5, rely=0.5, anchor="center")
 
         # Contenido del panel
@@ -56,7 +56,11 @@ class RolSelector(ctk.CTk):
             self.bg_label.configure(image=self.bg_image)
             self.bg_label.image = self.bg_image
 
-            # Centrar el panel sin estirarlo verticalmente
+            # Calcular nueva altura del panel (más alto y vertical)
+            nueva_altura = max(420, int(alto_actual * 0.7))  # mínimo 420, se adapta hasta 70% del alto
+            self.panel.configure(height=nueva_altura)
+
+            # Reubicar el panel centrado
             self.panel.place(relx=0.5, rely=0.5, anchor="center")
 
             self.tamaño_anterior = (ancho_actual, alto_actual)
